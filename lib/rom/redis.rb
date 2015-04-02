@@ -2,8 +2,11 @@ require 'json'
 require 'redic'
 require 'rom'
 
+require_relative './redis/serialization'
+
 module ROM
   module Redis
+
     class Relation < ROM::Relation
       forward :get
 
@@ -30,7 +33,7 @@ module ROM
       def insert(object)
         with_set do |set|
           set << object
-          connection.call('SET', name, JSON.dump(set))
+          connection.call('SET', name, Serialization.dump(set))
         end
         self
       end
@@ -39,7 +42,7 @@ module ROM
       private
 
       def with_set
-        yield(JSON.load(connection.call('GET', name)))
+        yield(Serialization.load(connection.call('GET', name)))
       end
     end
 
